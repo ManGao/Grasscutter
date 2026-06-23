@@ -2,7 +2,6 @@ package emu.grasscutter.game.gacha;
 
 import static emu.grasscutter.config.Configuration.GAME_OPTIONS;
 
-import com.sun.nio.file.SensitivityWatchEventModifier;
 import emu.grasscutter.Grasscutter;
 import emu.grasscutter.data.*;
 import emu.grasscutter.data.common.ItemParamData;
@@ -26,6 +25,8 @@ import it.unimi.dsi.fastutil.ints.*;
 import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
+
+import lombok.Synchronized;
 import org.greenrobot.eventbus.Subscribe;
 
 public class GachaSystem extends BaseGameSystem {
@@ -420,15 +421,15 @@ public class GachaSystem extends BaseGameSystem {
         player.getBattlePassManager().triggerMission(WatcherTriggerType.TRIGGER_GACHA_NUM, 0, times);
     }
 
+    @Synchronized
     private synchronized void startWatcher(GameServer server) {
         if (this.watchService == null) {
             try {
                 this.watchService = FileSystems.getDefault().newWatchService();
                 FileUtils.getDataUserPath("")
-                        .register(
-                                watchService,
-                                new WatchEvent.Kind[] {StandardWatchEventKinds.ENTRY_MODIFY},
-                                SensitivityWatchEventModifier.HIGH);
+                    .register(
+                        watchService,
+                        new WatchEvent.Kind[]{StandardWatchEventKinds.ENTRY_MODIFY});
             } catch (Exception e) {
                 Grasscutter.getLogger()
                         .error(

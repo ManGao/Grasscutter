@@ -54,8 +54,8 @@ spotless {
 compileJava.options.encoding = 'UTF-8'
 compileTestJava.options.encoding = 'UTF-8'
 
-//sourceCompatibility = JavaVersion.VERSION_21
-//targetCompatibility = JavaVersion.VERSION_21
+sourceCompatibility = JavaVersion.VERSION_21
+targetCompatibility = JavaVersion.VERSION_21
 
 group = 'io.grasscutter'
 version = '1.7.4'
@@ -422,4 +422,31 @@ delombok {
 // For terminal interacting in IDEA running
 run {
     standardInput = System.in
+}
+tasks.register('copyDeps', Copy) {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from configurations.runtimeClasspath
+    from configurations.compileClasspath
+    from configurations.annotationProcessor
+    from configurations.testRuntimeClasspath
+
+    into "$rootDir/lib1"
+}
+tasks.register('copyOneJar') {
+
+    doLast {
+
+        def f = configurations.runtimeClasspath.files.find {
+            it.name.contains("gson")
+        }
+
+        println "Source=${f}"
+        println "Size=${f.length()}"
+
+        java.nio.file.Files.copy(
+            f.toPath(),
+            file("$rootDir/test.jar").toPath(),
+            java.nio.file.StandardCopyOption.REPLACE_EXISTING
+        )
+    }
 }
